@@ -37,41 +37,33 @@ def initialize_attendance(df):
     for date_col in tuesdays:
         if date_col not in df.columns:
             df[date_col] = "A"
-    df["Total Attendance"] = 0
-    return df
-
-# Mark attendance
-def mark_attendance(df):
-    today = datetime.now().strftime("%d|%m|%y")
-    if today in df.columns:
-        st.write(f"Mark attendance for {today}:")
-        for index, row in df.iterrows():
-            if st.checkbox(row['Names'], key=row['Names']):
-                df.loc[index, today] = "P"
-    return df
-
-# Calculate total attendance
-def calculate_attendance(df):
-    attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
-    df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
     return df
 
 # Streamlit app
 def main():
     st.title('Attendance App')
 
-    global df  # Ensure df is recognized as a global variable
+    # Initialize DataFrame with Tuesdays
     df = initialize_attendance(df)
 
     # Mark attendance
-    df = mark_attendance(df)
+    today = datetime.now().strftime("%d|%m|%y")
+    if today in df.columns:
+        st.write(f"Mark attendance for {today}:")
+        for index, row in df.iterrows():
+            checked = st.checkbox(row['Names'], key=row['Names'])
+            if checked:
+                df.loc[index, today] = "P"
+            else:
+                df.loc[index, today] = "A"
 
     st.write("Attendance Data:")
     st.write(df)
 
-    # Calculate and display attendance
+    # Calculate total attendance
     if st.button('Calculate Attendance'):
-        df = calculate_attendance(df)
+        attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
+        df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
         st.write(df)
 
 if __name__ == "__main__":
