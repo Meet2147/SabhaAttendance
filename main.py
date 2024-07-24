@@ -44,6 +44,7 @@ def initialize_attendance(df):
 def mark_attendance(df):
     today = datetime.now().strftime("%d|%m|%y")
     if today in df.columns:
+        st.write(f"Mark attendance for {today}:")
         for index, row in df.iterrows():
             if st.checkbox(row['Names'], key=row['Names']):
                 df.loc[index, today] = "P"
