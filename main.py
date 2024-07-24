@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -23,6 +22,7 @@ df = pd.DataFrame(names, columns=["Names"])
 def get_all_tuesdays():
     today = datetime.now()
     first_day = today.replace(day=1)
+    # Find the first Tuesday
     first_tuesday = first_day + timedelta(days=(1 - first_day.weekday() + 7) % 7)
     tuesdays = [first_tuesday]
     while True:
@@ -33,21 +33,17 @@ def get_all_tuesdays():
     return [tuesday.strftime("%d|%m|%y") for tuesday in tuesdays]
 
 # Initialize attendance DataFrame
-def initialize_attendance(df):
+def initialize_attendance():
+    global df
     tuesdays = get_all_tuesdays()
     for date_col in tuesdays:
         if date_col not in df.columns:
             df[date_col] = "A"
     return df
 
-# Streamlit app
-def main():
-    st.title('Attendance App')
-
-    # Initialize DataFrame with Tuesdays
-    df = initialize_attendance(df)
-
-    # Mark attendance
+# Mark attendance
+def mark_attendance():
+    global df
     today = datetime.now().strftime("%d|%m|%y")
     if today in df.columns:
         st.write(f"Mark attendance for {today}:")
@@ -57,14 +53,31 @@ def main():
                 df.loc[index, today] = "P"
             else:
                 df.loc[index, today] = "A"
+    return df
+
+# Calculate total attendance
+def calculate_attendance():
+    global df
+    attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
+    df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
+    return df
+
+# Streamlit app
+def main():
+    st.title('Attendance App')
+
+    # Initialize DataFrame with Tuesdays
+    initialize_attendance()
+
+    # Mark attendance
+    mark_attendance()
 
     st.write("Attendance Data:")
     st.write(df)
 
-    # Calculate total attendance
+    # Calculate and display attendance
     if st.button('Calculate Attendance'):
-        attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
-        df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
+        calculate_attendance()
         st.write(df)
 
 if __name__ == "__main__":
