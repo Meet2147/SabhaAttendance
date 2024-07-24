@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Names extracted from the PDF
 names = [
@@ -18,41 +18,36 @@ names = [
 # Create a DataFrame
 df = pd.DataFrame(names, columns=["Names"])
 
-# Function to get all Tuesdays of the current month
-def get_all_tuesdays():
-    today = datetime.now()
-    first_day = today.replace(day=1)
-    first_tuesday = first_day + timedelta(days=(1 - first_day.weekday() + 7) % 7)
-    tuesdays = [first_tuesday]
-    while True:
-        next_tuesday = tuesdays[-1] + timedelta(days=7)
-        if next_tuesday.month != today.month:
-            break
-        tuesdays.append(next_tuesday)
-    return [tuesday.strftime("%d|%m|%y") for tuesday in tuesdays]
-
 # Initialize attendance DataFrame
 def initialize_attendance(df):
-    tuesdays = get_all_tuesdays()
-    for date_col in tuesdays:
+    today = datetime.now()
+    if today.weekday() == 1:  # If today is Tuesday
+        date_col = today.strftime("%d|%m|%y")
         if date_col not in df.columns:
             df[date_col] = "A"
-    df["Total Attendance"] = 0
     return df
 
 # Mark attendance
 def mark_attendance(df):
-    today = datetime.now().strftime("%d|%m|%y")
-    if today in df.columns:
+    today = datetime.now()
+    if today.weekday() == 1:  # If today is Tuesday
+        date_col = today.strftime("%d|%m|%y")
         for index, row in df.iterrows():
             if st.checkbox(row['Names'], key=row['Names']):
-                df.loc[index, today] = "P"
+                df.loc[index, date_col] = "P"
     return df
 
-# Calculate total attendance
+# Calculate attendance
 def calculate_attendance(df):
-    attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
-    df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
+    today = datetime.now()
+    monthly = (df.iloc[:, 1:] == "P").sum(axis=1)
+    quarterly = monthly  # Simplified for demo purposes
+    halfyearly = monthly  # Simplified for demo purposes
+    yearly = monthly  # Simplified for demo purposes
+    df["Monthly"] = monthly
+    df["Quarterly"] = quarterly
+    df["Half-Yearly"] = halfyearly
+    df["Yearly"] = yearly
     return df
 
 # Streamlit app
