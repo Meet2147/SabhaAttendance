@@ -2,83 +2,134 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Names extracted from the PDF
-names = [
-    "Nirav Chauhan", "Mayur Rajgor", "Meet Jethwa", "Manan Thakkar", "Smit Kotak", 
-    "Vatsal Patel", "Devansh Jethva", "Sanjay Mange", "Harikrishna Padhiyar", 
-    "Jay Chauhan", "Jaimin Chauhan", "Hari Mehta", "Rushi Mehta", "Jagdish Rajgor", 
-    "Rushi Rajgor", "Abhi Vakharia", "Manish Thakkar", "Vedant Nanda", "Mann Gori", 
-    "Sarvesh Padhiyar", "Dev Wadkar", "Viraj Patel", "Darshan Kataria", "Rahul Gavli", 
-    "Dhruv Patel", "Preet Ravariya", "Khushal Senghani", "Akshay Padhiyar", "Rohit Shinde", 
-    "Harshit Makwana", "Darshan Parmar", "Kavya Dama", "Yash Chawda", "Krishna Bhanushali", 
-    "Ankit Wadhvana", "Mann Mange", "Vansh Bhanushali", "Chintan Pujara", "Darsh Solanki", 
-    "Kush Thakkar"
-]
+# Parsing the provided attendance data
+data = {
+    "Nirav Chauhan": ["A", "A", "P"],
+    "Mayur Rajgor": ["P", "P", "P", "P"],
+    "Meet Jethwa": ["P", "P", "P", "P"],
+    "Manan Thakkar": ["P", "P", "P", "P"],
+    "Smit Kotak": ["P", "P", "P", "P"],
+    "Vatsal Patel": ["A", "A", "A"],
+    "Devansh Jethva": ["P", "A", "P"],
+    "Sanjay Mange": ["P", "A", "A"],
+    "Harikrishna Padhiyar": ["A", "P", "P", "P"],
+    "Jay Chauhan": ["A", "A", "P"],
+    "Jaimin Chauhan": ["A", "A", "P", "P"],
+    "Hari Mehta": ["A", "A", "A"],
+    "Rushi Mehta": ["A", "A", "A"],
+    "Jagdish Rajgor": ["P", "P", "A"],
+    "Rushi Rajgor": ["P", "P", "P", "P"],
+    "Abhi Vakharia": ["A", "A", "A"],
+    "Manish Thakkar": ["A", "A", "A"],
+    "Vedant Nanda": ["A", "A", "A"],
+    "Mann Gori": ["P", "P", "P", "P"],
+    "Sarvesh Padhiyar": ["P", "P", "P", "P"],
+    "Dev Wadkar": ["P", "A", "A"],
+    "Viraj Patel": ["A", "A", "A"],
+    "Darshan Kataria": ["A", "A", "A"],
+    "Rahul Gavli": ["A", "A", "A"],
+    "Dhruv Patel": ["A", "A", "A"],
+    "Preet Ravariya": ["A", "A", "A"],
+    "Khushal Senghani": ["A", "P", "A"],
+    "Akshay Padhiyar": ["A", "A", "A"],
+    "Rohit Shinde": ["A", "A", "A"],
+    "Harshit Makwana": ["A", "A", "A"],
+    "Darshan Parmar": ["A", "A", "A"],
+    "Kavya Dama": ["A", "A", "A"],
+    "Yash Chawda": ["A", "A", "A"],
+    "Krishna Bhanushali": ["A", "A", "A"],
+    "Ankit Wadhvana": ["A", "P", "A"],
+    "Mann Mange": ["A", "P", "P", "P"],
+    "Vansh Bhanushali": ["A", "A", "A"],
+    "Chintan Pujara": ["A", "A", "A"],
+    "Darsh Solanki": ["A", "A", "A"]
+}
 
-# Create a DataFrame
-df = pd.DataFrame(names, columns=["Names"])
+# Function to generate dates for all Tuesdays in the current year starting from July
+def get_all_tuesdays(year):
+    d = datetime(year, 7, 1)
+    d += timedelta(days=(1 - d.weekday() + 7) % 7)  # Move to the first Tuesday of July
+    while d.year == year:
+        yield d
+        d += timedelta(days=7)
 
-# Function to get all Tuesdays of the current month
-def get_all_tuesdays():
-    today = datetime.now()
-    first_day = today.replace(day=1)
-    # Find the first Tuesday
-    first_tuesday = first_day + timedelta(days=(1 - first_day.weekday() + 7) % 7)
-    tuesdays = [first_tuesday]
-    while True:
-        next_tuesday = tuesdays[-1] + timedelta(days=7)
-        if next_tuesday.month != today.month:
-            break
-        tuesdays.append(next_tuesday)
-    return [tuesday.strftime("%d|%m|%y") for tuesday in tuesdays]
+# Get current year
+current_year = datetime.now().year
 
-# Initialize attendance DataFrame
-def initialize_attendance():
-    global df
-    tuesdays = get_all_tuesdays()
-    for date_col in tuesdays:
-        if date_col not in df.columns:
-            df[date_col] = "A"
-    return df
+# Generate all Tuesdays for the current year starting from July
+tuesdays = list(get_all_tuesdays(current_year))
 
-# Mark attendance
-def mark_attendance():
-    global df
-    today = datetime.now().strftime("%d|%m|%y")
-    if today in df.columns:
-        st.write(f"Mark attendance for {today}:")
-        for index, row in df.iterrows():
-            checked = st.checkbox(row['Names'], key=row['Names'])
-            if checked:
-                df.loc[index, today] = "P"
-            else:
-                df.loc[index, today] = "A"
-    return df
+# Initialize DataFrame
+attendance_df = pd.DataFrame(index=data.keys(), columns=tuesdays)
 
-# Calculate total attendance
-def calculate_attendance():
-    global df
-    attendance_columns = [col for col in df.columns if col not in ["Names", "Total Attendance"]]
-    df["Total Attendance"] = (df[attendance_columns] == "P").sum(axis=1)
-    return df
+# Populate the DataFrame with initial data
+for idx, date in enumerate(tuesdays[:3]):  # First three dates in July
+    for name, attendance in data.items():
+        if idx < len(attendance):
+            attendance_df.at[name, date] = attendance[idx]
 
-# Streamlit app
-def main():
-    st.title('Attendance App')
+# Function to get summary
+def get_summary(attendance_df, period):
+    summary = attendance_df.apply(lambda row: (row == "P").sum() + (row == "Present in White and White").sum(), axis=1)
+    return summary
 
-    # Initialize DataFrame with Tuesdays
-    initialize_attendance()
+# Streamlit app with sidebar navigation
+st.sidebar.title("Attendance App Navigation")
+pages = ["Mark Attendance", "Week Attendance", "Month Attendance", "Quarter Attendance", "Half Year Attendance", "Yearly Attendance"]
+page = st.sidebar.radio("Go to", pages)
 
-    # Mark attendance
-    mark_attendance()
+if page == "Mark Attendance":
+    st.title("Mark Attendance")
+    selected_date = st.date_input("Select a Tuesday", value=tuesdays[0], min_value=tuesdays[0], max_value=tuesdays[-1])
+    selected_date = pd.to_datetime(selected_date)
 
-    st.write("Attendance Data:")
-    st.write(df)
+    if selected_date not in tuesdays:
+        st.error("Please select a valid Tuesday.")
+    else:
+        st.write(f"## Mark Attendance for {selected_date.date()}")
+        for name in data.keys():
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.write(name)
+            with col2:
+                attendance = st.radio(
+                    f"Attendance for {name}",
+                    ["Present", "Present in White and White", "Absent"],
+                    index=0 if attendance_df.at[name, selected_date] == "P" else 1 if attendance_df.at[name, selected_date] == "Present in White and White" else 2,
+                    key=f"attendance_{name}_{selected_date}",
+                    label_visibility="collapsed"
+                )
+                attendance_df.at[name, selected_date] = attendance
 
-    # Calculate and display attendance
-    if st.button('Calculate Attendance'):
-        calculate_attendance()
-        st.write(df)
+elif page == "Week Attendance":
+    st.title("Weekly Attendance Summary")
+    st.dataframe(get_summary(attendance_df, "weekly"))
 
-if __name__ == "__main__":
-    main()
+elif page == "Month Attendance":
+    st.title("Monthly Attendance Summary")
+    st.dataframe(get_summary(attendance_df, "monthly"))
+
+elif page == "Quarter Attendance":
+    st.title("Quarterly Attendance Summary")
+    st.dataframe(get_summary(attendance_df, "quarterly"))
+
+elif page == "Half Year Attendance":
+    st.title("Half-Yearly Attendance Summary")
+    st.dataframe(get_summary(attendance_df, "half-yearly"))
+
+elif page == "Yearly Attendance":
+    st.title("Yearly Attendance Summary")
+    st.dataframe(get_summary(attendance_df, "yearly"))
+
+# Provide a download link for the attendance data
+def convert_df(df):
+    return df.to_csv().encode('utf-8')
+
+csv = convert_df(attendance_df)
+
+st.download_button(
+    label="Download attendance data as CSV",
+    data=csv,
+    file_name='attendance.csv',
+    mime='text/csv',
+)
