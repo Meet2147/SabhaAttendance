@@ -31,7 +31,7 @@ current_year = datetime.now().year
 tuesdays = list(get_all_tuesdays(current_year))
 
 if "attendance_df" not in st.session_state:
-    st.session_state.attendance_df = pd.DataFrame(index=names, columns=saturdays)
+    st.session_state.attendance_df = pd.DataFrame(index=names, columns=tuesdays)
 
 # Initialize DataFrame
 attendance_df = st.session_state.attendance_df
@@ -46,11 +46,11 @@ def filter_attendance(attendance_df, period):
     if period == "weekly":
         return attendance_df.iloc[:, :4]
     elif period == "monthly":
-        return attendance_df.iloc[:, :4]  # Assuming 4 Saturdays in a month
+        return attendance_df.iloc[:, :4]  # Assuming 4 tuesdays in a month
     elif period == "quarterly":
-        return attendance_df.iloc[:, :13]  # Assuming 13 Saturdays in a quarter
+        return attendance_df.iloc[:, :13]  # Assuming 13 tuesdays in a quarter
     elif period == "half-yearly":
-        return attendance_df.iloc[:, :26]  # Assuming 26 Saturdays in a half-year
+        return attendance_df.iloc[:, :26]  # Assuming 26 tuesdays in a half-year
     elif period == "yearly":
         return attendance_df  # All data for the year
 
@@ -61,11 +61,11 @@ page = st.sidebar.radio("Go to", pages)
 
 if page == "Mark Attendance":
     st.title("Mark Attendance")
-    selected_date = st.date_input("Select a Saturday", value=saturdays[0], min_value=saturdays[0], max_value=saturdays[-1])
+    selected_date = st.date_input("Select a tuesday", value=tuesdays[0], min_value=tuesdays[0], max_value=tuesdays[-1])
     selected_date = pd.to_datetime(selected_date)
 
-    if selected_date not in saturdays:
-        st.error("Please select a valid Saturday.")
+    if selected_date not in tuesdays:
+        st.error("Please select a valid Tuesday.")
     else:
         st.write(f"## Mark Attendance for {selected_date.date()}")
 
