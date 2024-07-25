@@ -60,17 +60,11 @@ current_year = datetime.now().year
 tuesdays = list(get_all_tuesdays(current_year))
 
 # Initialize DataFrame
-attendance_df = pd.DataFrame(index=data.keys(), columns=tuesdays)
-
-# Populate the DataFrame with initial data
-for idx, date in enumerate(tuesdays[:3]):  # First three dates in July
-    for name, attendance in data.items():
-        if idx < len(attendance):
-            attendance_df.at[name, date] = attendance[idx]
+attendance_df = st.session_state.attendance_df
 
 # Function to get summary
 def get_summary(attendance_df, period):
-    summary = attendance_df.apply(lambda row: (row == "P").sum() + (row == "Present in White and White").sum(), axis=1)
+    summary = attendance_df.apply(lambda row: (row == "P").sum(), axis=1)
     return summary
 
 # Function to filter attendance data based on period
@@ -78,11 +72,11 @@ def filter_attendance(attendance_df, period):
     if period == "weekly":
         return attendance_df.iloc[:, :4]
     elif period == "monthly":
-        return attendance_df.iloc[:, :4]  # Assuming 4 Tuesdays in a month
+        return attendance_df.iloc[:, :4]  # Assuming 4 Saturdays in a month
     elif period == "quarterly":
-        return attendance_df.iloc[:, :13]  # Assuming 13 Tuesdays in a quarter
+        return attendance_df.iloc[:, :13]  # Assuming 13 Saturdays in a quarter
     elif period == "half-yearly":
-        return attendance_df.iloc[:, :26]  # Assuming 26 Tuesdays in a half-year
+        return attendance_df.iloc[:, :26]  # Assuming 26 Saturdays in a half-year
     elif period == "yearly":
         return attendance_df  # All data for the year
 
@@ -93,26 +87,46 @@ page = st.sidebar.radio("Go to", pages)
 
 if page == "Mark Attendance":
     st.title("Mark Attendance")
-    selected_date = st.date_input("Select a Tuesday", value=tuesdays[0], min_value=tuesdays[0], max_value=tuesdays[-1])
+    selected_date = st.date_input("Select a Saturday", value=saturdays[0], min_value=saturdays[0], max_value=saturdays[-1])
     selected_date = pd.to_datetime(selected_date)
 
-    if selected_date not in tuesdays:
-        st.error("Please select a valid Tuesday.")
+    if selected_date not in saturdays:
+        st.error("Please select a valid Saturday.")
     else:
         st.write(f"## Mark Attendance for {selected_date.date()}")
-        for name in data.keys():
+
+        search_name = st.text_input("Search for a name:")
+        filtered_names = [name for name in names if search_name.lower() in name.lower()]
+
+        if search_name and filtered_names:
+            name = filtered_names[0]  # Get the first matching name
             col1, col2 = st.columns([1, 3])
             with col1:
                 st.write(name)
             with col2:
                 attendance = st.radio(
                     f"Attendance for {name}",
-                    ["Present", "Present in White and White", "Absent"],
-                    index=0 if attendance_df.at[name, selected_date] == "P" else 1 if attendance_df.at[name, selected_date] == "Present in White and White" else 2,
+                    ["Present", "W&W", "Absent", "Absent with reason"],
+                    index=0 if attendance_df.at[name, selected_date] == "P" else 1 if attendance_df.at[name, selected_date] == "W&W" else 2 if attendance_df.at[name, selected_date] == "A" else 3,
                     key=f"attendance_{name}_{selected_date}",
-                    label_visibility="collapsed"
+                    horizontal=True
                 )
-                attendance_df.at[name, selected_date] = attendance
+
+                reason = ""
+                if attendance == "Absent with reason":
+                    reason = st.text_input(f"Reason for {name}", key=f"reason_{name}_{selected_date}")
+
+            if st.button("Submit"):
+                if attendance == "Absent with reason":
+                    attendance_df.at[name, selected_date] = f"AR: {reason}"
+                elif attendance == "Present":
+                    attendance_df.at[name, selected_date] = "P"
+                elif attendance == "W&W":
+                    attendance_df.at[name, selected_date] = "W&W"
+                elif attendance == "Absent":
+                    attendance_df.at[name, selected_date] = "A"
+                st.success(f"Attendance marked for {name}")
+                st.experimental_rerun()  # Refresh the page to update the data
 
 elif page == "Week Attendance":
     st.title("Weekly Attendance Summary")
