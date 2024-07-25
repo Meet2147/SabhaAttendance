@@ -73,6 +73,19 @@ def get_summary(attendance_df, period):
     summary = attendance_df.apply(lambda row: (row == "P").sum() + (row == "Present in White and White").sum(), axis=1)
     return summary
 
+# Function to filter attendance data based on period
+def filter_attendance(attendance_df, period):
+    if period == "weekly":
+        return attendance_df.iloc[:, :4]
+    elif period == "monthly":
+        return attendance_df.iloc[:, :4]  # Assuming 4 Tuesdays in a month
+    elif period == "quarterly":
+        return attendance_df.iloc[:, :13]  # Assuming 13 Tuesdays in a quarter
+    elif period == "half-yearly":
+        return attendance_df.iloc[:, :26]  # Assuming 26 Tuesdays in a half-year
+    elif period == "yearly":
+        return attendance_df  # All data for the year
+
 # Streamlit app with sidebar navigation
 st.sidebar.title("Attendance App Navigation")
 pages = ["Mark Attendance", "Week Attendance", "Month Attendance", "Quarter Attendance", "Half Year Attendance", "Yearly Attendance"]
@@ -103,23 +116,23 @@ if page == "Mark Attendance":
 
 elif page == "Week Attendance":
     st.title("Weekly Attendance Summary")
-    st.dataframe(get_summary(attendance_df, "weekly"))
+    st.dataframe(filter_attendance(attendance_df, "weekly"))
 
 elif page == "Month Attendance":
     st.title("Monthly Attendance Summary")
-    st.dataframe(get_summary(attendance_df, "monthly"))
+    st.dataframe(filter_attendance(attendance_df, "monthly"))
 
 elif page == "Quarter Attendance":
     st.title("Quarterly Attendance Summary")
-    st.dataframe(get_summary(attendance_df, "quarterly"))
+    st.dataframe(filter_attendance(attendance_df, "quarterly"))
 
 elif page == "Half Year Attendance":
     st.title("Half-Yearly Attendance Summary")
-    st.dataframe(get_summary(attendance_df, "half-yearly"))
+    st.dataframe(filter_attendance(attendance_df, "half-yearly"))
 
 elif page == "Yearly Attendance":
     st.title("Yearly Attendance Summary")
-    st.dataframe(get_summary(attendance_df, "yearly"))
+    st.dataframe(filter_attendance(attendance_df, "yearly"))
 
 # Provide a download link for the attendance data
 def convert_df(df):
