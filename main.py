@@ -3,47 +3,18 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # Parsing the provided attendance data
-data = {
-    "Nirav Chauhan": ["A", "A", "P"],
-    "Mayur Rajgor": ["P", "P", "P", "P"],
-    "Meet Jethwa": ["P", "P", "P", "P"],
-    "Manan Thakkar": ["P", "P", "P", "P"],
-    "Smit Kotak": ["P", "P", "P", "P"],
-    "Vatsal Patel": ["A", "A", "A"],
-    "Devansh Jethva": ["P", "A", "P"],
-    "Sanjay Mange": ["P", "A", "A"],
-    "Harikrishna Padhiyar": ["A", "P", "P", "P"],
-    "Jay Chauhan": ["A", "A", "P"],
-    "Jaimin Chauhan": ["A", "A", "P", "P"],
-    "Hari Mehta": ["A", "A", "A"],
-    "Rushi Mehta": ["A", "A", "A"],
-    "Jagdish Rajgor": ["P", "P", "A"],
-    "Rushi Rajgor": ["P", "P", "P", "P"],
-    "Abhi Vakharia": ["A", "A", "A"],
-    "Manish Thakkar": ["A", "A", "A"],
-    "Vedant Nanda": ["A", "A", "A"],
-    "Mann Gori": ["P", "P", "P", "P"],
-    "Sarvesh Padhiyar": ["P", "P", "P", "P"],
-    "Dev Wadkar": ["P", "A", "A"],
-    "Viraj Patel": ["A", "A", "A"],
-    "Darshan Kataria": ["A", "A", "A"],
-    "Rahul Gavli": ["A", "A", "A"],
-    "Dhruv Patel": ["A", "A", "A"],
-    "Preet Ravariya": ["A", "A", "A"],
-    "Khushal Senghani": ["A", "P", "A"],
-    "Akshay Padhiyar": ["A", "A", "A"],
-    "Rohit Shinde": ["A", "A", "A"],
-    "Harshit Makwana": ["A", "A", "A"],
-    "Darshan Parmar": ["A", "A", "A"],
-    "Kavya Dama": ["A", "A", "A"],
-    "Yash Chawda": ["A", "A", "A"],
-    "Krishna Bhanushali": ["A", "A", "A"],
-    "Ankit Wadhvana": ["A", "P", "A"],
-    "Mann Mange": ["A", "P", "P", "P"],
-    "Vansh Bhanushali": ["A", "A", "A"],
-    "Chintan Pujara": ["A", "A", "A"],
-    "Darsh Solanki": ["A", "A", "A"]
-}
+names = [
+    "Nirav Chauhan", "Mayur Rajgor", "Meet Jethwa", "Manan Thakkar", "Smit Kotak", 
+    "Vatsal Patel", "Devansh Jethva", "Sanjay Mange", "Harikrishna Padhiyar", 
+    "Jay Chauhan", "Jaimin Chauhan", "Hari Mehta", "Rushi Mehta", "Jagdish Rajgor", 
+    "Rushi Rajgor", "Abhi Vakharia", "Manish Thakkar", "Vedant Nanda", "Mann Gori", 
+    "Sarvesh Padhiyar", "Dev Wadkar", "Viraj Patel", "Darshan Kataria", "Rahul Gavli", 
+    "Dhruv Patel", "Preet Ravariya", "Khushal Senghani", "Akshay Padhiyar", "Rohit Shinde", 
+    "Harshit Makwana", "Darshan Parmar", "Kavya Dama", "Yash Chawda", "Krishna Bhanushali", 
+    "Ankit Wadhvana", "Mann Mange", "Vansh Bhanushali", "Chintan Pujara", "Darsh Solanki", 
+    "Kush Thakkar"
+]
+
 
 # Function to generate dates for all Tuesdays in the current year starting from July
 def get_all_tuesdays(year):
