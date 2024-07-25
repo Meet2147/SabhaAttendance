@@ -59,6 +59,9 @@ current_year = datetime.now().year
 # Generate all Tuesdays for the current year starting from July
 tuesdays = list(get_all_tuesdays(current_year))
 
+if "attendance_df" not in st.session_state:
+    st.session_state.attendance_df = pd.DataFrame(index=names, columns=saturdays)
+
 # Initialize DataFrame
 attendance_df = st.session_state.attendance_df
 
